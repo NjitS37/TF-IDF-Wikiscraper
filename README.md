@@ -25,10 +25,10 @@ https://en.wikipedia.org/wiki/Artificial_intelligence
 https://en.wikipedia.org/wiki/Machine_learning  
 
 Functions of the code:
-Article Scraping: The code scrapes the main Wikipedia articles provided in the input `.txt` file.  
-Hyperlink Extraction: For each main article, the script extracts all hyperlinks pointing to other relevant Wikipedia articles.  
-TF-IDF Analysis: The script computes the Term Frequency-Inverse Document Frequency (TF-IDF) for words found across all the scraped articles.  
-Output: The code outputs the top N terms with the highest average TF-IDF scores, where N is the number of main articles initially provided in the input.
+- Article Scraping: The code scrapes the main Wikipedia articles provided in the input `.txt` file.  
+- Hyperlink Extraction: For each main article, the script extracts all hyperlinks pointing to other relevant Wikipedia articles.  
+- TF-IDF Analysis: The script computes the Term Frequency-Inverse Document Frequency (TF-IDF) for words found across all the scraped articles.  
+- Output: The code outputs the top N terms with the highest average TF-IDF scores, where N is the number of main articles initially provided in the input.
 
 Running the Code:
 To run the script, ensure that the `.txt` file with the list of Wikipedia article URLs is prepared. Then, execute the Python script.
