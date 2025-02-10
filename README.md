@@ -16,7 +16,7 @@ The following Python packages are used in this code:
 To install the necessary packages (those not included in Python's standard library), run the following command:
 ```bash
 pip install requests beautifulsoup4 numpy pandas scikit-learn
-
+```
 
 
 The input is a `.txt` file where each line contains the URL of a relevant Wikipedia article. For example:
@@ -37,6 +37,7 @@ To run the script, ensure that the `.txt` file with the list of Wikipedia articl
 Example Command:
 ```bash
 python wikiscraper.py --input input.txt --output wordlist.txt
+```
 
 Where `wikiscraper.py` is the name of your Python script, `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist.
 
