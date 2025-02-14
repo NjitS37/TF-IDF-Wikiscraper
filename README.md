@@ -42,6 +42,6 @@ Example Command:
 python tf_idf_scraper_cmd.py --input input.txt --output wordlist.txt --N 50 --ngram 2
 ```
 
-Where `wikiscraper.py` is the name of your Python script, `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram` is the maximum of how many words a term in the wordlist can exist of.
+Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram` is the maximum of how many words a term in the wordlist can exist of.
 
 The script will output the terms with the highest average TF-IDF values for all scraped articles. These terms can be considered the most relevant across the provided Wikipedia articles.
