@@ -11,134 +11,114 @@ import time
 
 
 def contentscraper(link):
-  """Deze functie neemt een url als string in en stript alle HMTL elementen om zo alleen de text inhoud te returen als een string."""
-  html = urlopen(link).read()
-  soup = BeautifulSoup(html, features="html.parser")
+    """Scrapes content from a Wikipedia article and removes HTML elements."""
+    html = urlopen(link).read()
+    soup = BeautifulSoup(html, features="html.parser")
 
-  # Remove all script and style elements
-  for script in soup(["script", "style"]):
-      script.extract()
+    # Remove all script and style elements
+    for script in soup(["script", "style"]):
+        script.extract()
 
-  # Find the main html area for the article
-  content_area = soup.find(id="mw-content-text")
+    content_area = soup.find(id="mw-content-text")
+   
+    # Check that only relevant text is saved. Everything (including) after references is ignored
+    references_header = content_area.find("h2", string=re.compile(r"References", re.I))
+    if references_header:
+        content = []
+        for element in content_area.find_all():
+            if element == references_header:
+                break
+            
+            # Subheaders are ignored
+            if element.name in ["p", "ul", "ol"]:
+                content.append(element.text)
+        text = "\n".join(content)
+    else:
+        text = content_area.get_text()
 
-  # Find the "References" header using regex
-  references_header = content_area.find("h2", string=re.compile(r"References", re.I))
-
-  # If "References" header is found, extract content before it
-  if references_header:
-      content = []
-      for element in content_area.find_all():  # Iterate through all elements
-          if element == references_header:
-              break  # Stop when we reach the "References" header
-          if element.name in ["p", "ul", "ol"]:  # Select relevant elements
-              content.append(element.text)
-
-      text = "\n".join(content)  # Join the content with newlines
-
-  else:
-      # If "References" header is not found, use all content
-      text = content_area.get_text()
-
-  # Remove citations and edits within brackets []
-  text = re.sub(r"\[\d+\]", "", text)
-
-  # Clean up the text
-
-  lines = (line.strip() for line in text.splitlines())
-  chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-  text = '\n'.join(chunk for chunk in chunks if chunk)
-
-  return(text)
+    # Structure the scraped text
+    text = re.sub(r"\[\d+\]", "", text)
+    lines = (line.strip() for line in text.splitlines())
+    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+    return '\n'.join(chunk for chunk in chunks if chunk)
 
 
 def linklist(url):
-  """Deze functie neemt een url als string en levert een lijst van alle urls waarnaar gelinked wordt in het artikel, samen met de link van het artikel zelf."""
-  response = requests.get(url)
+    """Extracts all Wikipedia article hyperlinks from a given page."""
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
 
-  soup = BeautifulSoup(response.content, 'html.parser')
+    titles_written = [url]
+    # Obtain all hyperlinks by looking at the html <a>...</a>
+    allLinks = soup.find(id="bodyContent").find_all("a")
 
-  # Here we will get all the pages our starting page links to.
-  # In HTML, <a> </a> is used for creating hyperlinks
+    # Only save wikipedia links, ignore special links or outside references
+    for link in allLinks:
+        if 'href' not in link.attrs:
+            continue
+        if link['href'].find("/wiki/") == -1 or ":" in link['href']:
+            continue
+        
+        # Construct full url
+        full_url = "https://en.wikipedia.org" + link['href']
+        if full_url not in titles_written:
+            titles_written.append(full_url)
 
-  titles_written = [url]
-
-  allLinks = soup.find(id="bodyContent").find_all("a")
-
-  for link in allLinks:
-    # Check if the link has the 'href' attribute before accessing it
-    if 'href' not in link.attrs:  # Check for 'href' attribute first
-        continue
-    if link['href'].find("/wiki/") == -1 or ":" in link['href']:
-        continue  # Skip if it's not a wikipedia article or it is a special page.
-
-    # Construct the full URL
-    full_url = "https://en.wikipedia.org" + link['href']
-
-    if full_url not in titles_written:
-        titles_written.append(full_url)
-
-  return (titles_written)
+    return titles_written
 
 
 def custom_tokenizer(text):
-  """Tokenizer die woorden filtert op basis van lengte en speciale tekens."""
-  words = re.findall(r'\b[a-zA-Z\'-]{3,}\b', text.lower())  # Filter out words with at least 3 characters
-
-  # Filter out "citation" and "citation needed", dit zijn notities die in artikelen staan
-  filtered_words = [word for word in words if word not in ["citation", "citation needed"]]
-
-  return filtered_words  # Return the filtered words
+    """Tokenizes words and filters out common Wikipedia-specific terms."""
+    # Filtering special characters and words that are shorter than 3 characters.
+    words = re.findall(r'\b[a-zA-Z\'-]{3,}\b', text.lower())
+    return [word for word in words if word not in ["citation", "citation needed"]]
 
 
 def wikiscraper(input_file, output_file, N, ngram):
-    """Deze scraper neemt een file met urls als string, een aantal woorden die de functie output in een woordenlijst (N), en hoeveel woorden er maximaal gepakt worden tegelijk (ngram).
-    De functie maakt een ranking van de woorden uit Wikipedia-artikelen met TF-IDF en returnt een woordenlijst."""
-
+    """Scrapes Wikipedia articles, applies TF-IDF, and outputs the top N words."""
+    
+    print("Start met scrapen.")
+    
+    t0 = time.time()
+    
     with open(input_file, 'r') as f:
         urls = [line.strip() for line in f]
 
     vectorizer = TfidfVectorizer(ngram_range=(1, ngram), stop_words='english', tokenizer=custom_tokenizer, token_pattern=None)
-    all_results = []  # Store results per main link
+    all_results = []
 
-    t0 = time.time()
-
+    # Run for all the linked articles in the provided main articles
     for url in urls:
-        content = []  # Reset content for each main link
+        content = []
+        for i in linklist(url):
+            content.append(contentscraper(i))
 
-        for i in linklist(url):  # Get linked articles
-            content.append(contentscraper(i))  # Scrape article content
-
-        if not content:  # Skip if no content was retrieved
+        if not content:
             continue
 
-        # Apply TF-IDF for this main link
+        # TF-IDF calculation
         X = vectorizer.fit_transform(content)
         tfidf_tokens = vectorizer.get_feature_names_out()
-
-        # Create a DataFrame for this main link
         result = pd.DataFrame(data=X.toarray(), columns=tfidf_tokens)
+        
 
-        # Aggregate scores and rank words **for this main link only**
+        # Rank the TD-IDF values to get a wordlist, in this case by taking the average
         data = result.T
         data["gemiddelde"] = data.mean(axis=1)
         data = data.sort_values(by="gemiddelde", ascending=False)
 
-        # Take top N words for this main link
-        # Bewaar alle woorden met hun TF-IDF scores (zonder vroegtijdige selectie)
-        all_results.append(data[["gemiddelde"]].reset_index())  # Voeg alles toe
+        all_results.append(data[["gemiddelde"]].reset_index())
 
-    # Combine all results and compute global ranking
+    # Show top N results
     if all_results:
         final_df = pd.concat(all_results, ignore_index=True)
-        # Rename the columns to 'word' and 'score'
-        final_df.columns = ['word', 'score']  # Rename columns here
-        final_df = final_df.groupby("word").mean().sort_values(by="score", ascending=False)  # Gemiddelde per woord
-        top_terms = final_df.head(N).index.tolist()  # Pas nu pas de selectie toe
+        final_df.columns = ['word', 'score']
+        final_df = final_df.groupby("word").mean().sort_values(by="score", ascending=False)
+        top_terms = final_df.head(N).index.tolist()
     else:
         top_terms = []
 
-    # Write the top N terms to a file
+    # Write wordlist to a file
     with open(output_file, 'w') as f:
         for term in top_terms:
             f.write(term + '\n')
