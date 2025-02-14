@@ -1,7 +1,9 @@
 # TF-IDF-Wikiscraper
-This Python script scrapes Wikipedia articles based on a list of main article URLs provided in a `.txt` file. This code needs an internet connection.
+This Python script scrapes English Wikipedia articles based on a list of main article URLs provided in a `.txt` file. This code needs an internet connection.
 The script collects all hyperlinks within the main articles, then analyzes the content of those articles to extract the most relevant terms. 
 The output consists of the terms with the highest average TF-IDF (Term Frequency-Inverse Document Frequency) across all articles.
+
+There are two versions of the code provided, `tf_idf_scraper.py` is just the python functions, and `tf_idf_scraper_cmd.py` can be used to run the code from the command line.
 
 The following Python packages are used in this code:
 - `requests`
@@ -32,7 +34,7 @@ Functions of the code:
 - Output: The code outputs the top N terms with the highest average TF-IDF scores, where N is the number of main articles initially provided in the input.
 
 Running the Code:
-To run the script, ensure that the `.txt` file with the list of Wikipedia article URLs is prepared. Then, execute the Python script.
+To run the script, ensure that the `.txt` file with the list of Wikipedia article URLs is prepared. Then, execute the Python script. this can be done in an IDE or from, for example, Anaconda prompt.
 
 Example Command:
 ```bash
