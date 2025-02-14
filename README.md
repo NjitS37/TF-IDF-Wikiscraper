@@ -6,6 +6,7 @@ The output consists of the terms with the highest average TF-IDF (Term Frequency
 There are two versions of the code provided, `tf_idf_scraper.py` is just the python functions, and `tf_idf_scraper_cmd.py` can be used to run the code from the command line.
 
 The following Python packages are used in this code:
+- `argparse` (for running the code from command line)
 - `requests`
 - `beautifulsoup4`
 - `numpy`
