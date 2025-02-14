@@ -26,19 +26,23 @@ def contentscraper(link):
         script.extract()
 
     content_area = soup.find(id="mw-content-text")
+   
+    # Check that only relevant text is saved. Everything (including) after references is ignored
     references_header = content_area.find("h2", string=re.compile(r"References", re.I))
-
     if references_header:
         content = []
         for element in content_area.find_all():
             if element == references_header:
                 break
+            
+            # Subheaders are ignored
             if element.name in ["p", "ul", "ol"]:
                 content.append(element.text)
         text = "\n".join(content)
     else:
         text = content_area.get_text()
 
+    # Structure the scraped text
     text = re.sub(r"\[\d+\]", "", text)
     lines = (line.strip() for line in text.splitlines())
     chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -46,18 +50,22 @@ def contentscraper(link):
 
 
 def linklist(url):
-    """Extracts all Wikipedia article links from a given page."""
+    """Extracts all Wikipedia article hyperlinks from a given page."""
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
     titles_written = [url]
+    # Obtain all hyperlinks by looking at the html <a>...</a>
     allLinks = soup.find(id="bodyContent").find_all("a")
 
+    # Only save wikipedia links, ignore special links or outside references
     for link in allLinks:
         if 'href' not in link.attrs:
             continue
         if link['href'].find("/wiki/") == -1 or ":" in link['href']:
             continue
+        
+        # Construct full url
         full_url = "https://en.wikipedia.org" + link['href']
         if full_url not in titles_written:
             titles_written.append(full_url)
@@ -67,21 +75,25 @@ def linklist(url):
 
 def custom_tokenizer(text):
     """Tokenizes words and filters out common Wikipedia-specific terms."""
+    # Filtering special characters and words that are shorter than 3 characters.
     words = re.findall(r'\b[a-zA-Z\'-]{3,}\b', text.lower())
     return [word for word in words if word not in ["citation", "citation needed"]]
 
 
 def wikiscraper(input_file, output_file, N, ngram):
     """Scrapes Wikipedia articles, applies TF-IDF, and outputs the top N words."""
+    
     print("Start met scrapen.")
+    
     t0 = time.time()
+    
     with open(input_file, 'r') as f:
         urls = [line.strip() for line in f]
 
     vectorizer = TfidfVectorizer(ngram_range=(1, ngram), stop_words='english', tokenizer=custom_tokenizer, token_pattern=None)
     all_results = []
 
-
+    # Run for all the linked articles in the provided main articles
     for url in urls:
         content = []
         for i in linklist(url):
@@ -90,16 +102,20 @@ def wikiscraper(input_file, output_file, N, ngram):
         if not content:
             continue
 
+        # TF-IDF calculation
         X = vectorizer.fit_transform(content)
         tfidf_tokens = vectorizer.get_feature_names_out()
         result = pd.DataFrame(data=X.toarray(), columns=tfidf_tokens)
+        
 
+        # Rank the TD-IDF values to get a wordlist, in this case by taking the average
         data = result.T
         data["gemiddelde"] = data.mean(axis=1)
         data = data.sort_values(by="gemiddelde", ascending=False)
 
         all_results.append(data[["gemiddelde"]].reset_index())
 
+    # Show top N results
     if all_results:
         final_df = pd.concat(all_results, ignore_index=True)
         final_df.columns = ['word', 'score']
@@ -108,6 +124,7 @@ def wikiscraper(input_file, output_file, N, ngram):
     else:
         top_terms = []
 
+    # Write wordlist to a file
     with open(output_file, 'w') as f:
         for term in top_terms:
             f.write(term + '\n')
