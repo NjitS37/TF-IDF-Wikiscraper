@@ -3,7 +3,7 @@ This Python script scrapes English Wikipedia articles based on a list of main ar
 The script collects all hyperlinks within the main articles, then analyzes the content of those articles to extract the most relevant terms. 
 The output consists of the terms with the highest average TF-IDF (Term Frequency-Inverse Document Frequency) across all articles.
 
-There are two versions of the code provided, `tf_idf_scraper.py` is just the python functions, and `tf_idf_scraper_cmd.py` can be used to run the code from the command line.
+The code, `tf_idf_wikiscraper.py` can be ran from the command line.
 
 The following Python packages are used in this code:
 - `argparse` (for running the code from command line)
@@ -39,7 +39,7 @@ To run the script, ensure that the `.txt` file with the list of Wikipedia articl
 
 Example Command:
 ```bash
-python tf_idf_scraper_cmd.py --input input.txt --output wordlist.txt --N 50 --ngram 2
+python tf_idf_wikiscraper.py --input input.txt --output wordlist.txt --N 50000 --ngram 2
 ```
 
 Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram` is the maximum of how many words a term in the wordlist can exist of.
