@@ -80,24 +80,33 @@ def custom_tokenizer(text):
     return [word for word in words if word not in ["citation", "citation needed"]]
 
 
-def wikiscraper(input_file, output_file, N, ngram):
+def wikiscraper(input_file, output_file, N, ngram_min, ngram_max):
     """Scrapes Wikipedia articles, applies TF-IDF, and outputs the top N words."""
     
-    print("Start met scrapen.")
+    print("Start scraping.")
     
     t0 = time.time()
     
     with open(input_file, 'r') as f:
         urls = [line.strip() for line in f]
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, ngram), stop_words='english', tokenizer=custom_tokenizer, token_pattern=None)
+    vectorizer = TfidfVectorizer(ngram_range=(ngram_min, ngram_max), stop_words='english', tokenizer=custom_tokenizer, token_pattern=None)
     all_results = []
-
+    linklengte = 0
+    scraped_count = 0
+    
     # Run for all the linked articles in the provided main articles
     for url in urls:
         content = []
-        for i in linklist(url):
+        links = linklist(url)
+        linklengte += len(links)
+        
+        for i in links:
             content.append(contentscraper(i))
+            scraped_count += 1
+            
+            if scraped_count % 50 == 0:
+                print(f"{scraped_count}/{linklengte} links scraped")
 
         if not content:
             continue
@@ -107,7 +116,6 @@ def wikiscraper(input_file, output_file, N, ngram):
         tfidf_tokens = vectorizer.get_feature_names_out()
         result = pd.DataFrame(data=X.toarray(), columns=tfidf_tokens)
         
-
         # Rank the TD-IDF values to get a wordlist, in this case by taking the average
         data = result.T
         data["gemiddelde"] = data.mean(axis=1)
@@ -130,6 +138,7 @@ def wikiscraper(input_file, output_file, N, ngram):
             f.write(term + '\n')
 
     t1 = time.time()
+    print(linklengte, "articles have been scraped.")
     print(f"Generating the wordlist took {t1 - t0:.2f} seconds.")
 
 
@@ -137,12 +146,13 @@ def main():
     parser = argparse.ArgumentParser(description="Wikipedia scraper for word ranking.")
     parser.add_argument("--input", required=True, help="Path to input file with URLs")
     parser.add_argument("--output", required=True, help="Path to output file")
-    parser.add_argument("--N", type=int, default=100, help="Number of words to output (default: 100)")
-    parser.add_argument("--ngram", type=int, default=1, help="Maximum n-gram size (default: 1)")
+    parser.add_argument("--N", type=int, default=100, help="Number of words to output (default: 10000)")
+    parser.add_argument("--ngram_min", type=int, default=1, help="Minimum n-gram size (default: 1)")
+    parser.add_argument("--ngram_max", type=int, default=1, help="Maximum n-gram size (default: 1)")
 
     args = parser.parse_args()
 
-    wikiscraper(args.input, args.output, args.N, args.ngram)
+    wikiscraper(args.input, args.output, args.N, args.ngram_min, args.ngram_max)
 
 
 if __name__ == "__main__":
