@@ -42,6 +42,6 @@ Example Command:
 python tf_idf_wikiscraper.py --input input.txt --output wordlist.txt --N 50000 --ngram_max 2
 ```
 
-Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram_min` is the minimum and `ngram_max` is the maximum of how many words a term in the wordlist can exist of.
+Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram_min` is the minimum and `ngram_max` is the maximum of how many words a term in the wordlist can exist of. When not specified, the standard value for `N` is 100, and the standard values for `ngram_min` and `ngram_max` are 1. 
 
 The script will output the terms with the highest average TF-IDF values for all scraped articles. These terms can be considered the most relevant across the provided Wikipedia articles.
