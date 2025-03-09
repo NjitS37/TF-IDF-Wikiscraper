@@ -77,7 +77,7 @@ def custom_tokenizer(text):
     """Tokenizes words and filters out common Wikipedia-specific terms."""
     # Filtering special characters and words that are shorter than 3 characters.
     words = re.findall(r'\b[a-zA-Z\'-]{3,}\b', text.lower())
-    return [word for word in words if word not in ["citation", "citation needed"]]
+    return [word for word in words if word not in ["citation", "citation needed", "isbn", "issn", "displaystyle"]]
 
 
 def wikiscraper(input_file, output_file, N, ngram_min, ngram_max):
@@ -146,7 +146,7 @@ def main():
     parser = argparse.ArgumentParser(description="Wikipedia scraper for word ranking.")
     parser.add_argument("--input", required=True, help="Path to input file with URLs")
     parser.add_argument("--output", required=True, help="Path to output file")
-    parser.add_argument("--N", type=int, default=100, help="Number of words to output (default: 10000)")
+    parser.add_argument("--N", type=int, default=10000, help="Number of words to output (default: 10000)")
     parser.add_argument("--ngram_min", type=int, default=1, help="Minimum n-gram size (default: 1)")
     parser.add_argument("--ngram_max", type=int, default=1, help="Maximum n-gram size (default: 1)")
 
