@@ -1,7 +1,7 @@
 # TF-IDF-Wikiscraper
 This Python script scrapes English Wikipedia articles based on a list of main article URLs provided in a `.txt` file. This code needs an internet connection.
 The script collects all hyperlinks within the main articles, then analyzes the content of those articles to extract the most relevant terms. 
-The output consists of the terms with the highest average TF-IDF (Term Frequency-Inverse Document Frequency) across all articles. The length of the wordlist and the word `n-grams` can be specified.
+The output consists of the terms with the highest average TF-IDF (Term Frequency-Inverse Document Frequency) across all articles. The length of the wordlist and a range of the word `n-grams` can be specified.
 
 The code, `tf_idf_wikiscraper.py` can be ran from the command line.
 
@@ -16,7 +16,7 @@ The following Python packages are used in this code:
 - `sklearn` (for TF-IDF analysis)
 - `time` (for time-related functionality, part of Python's standard library)
 
-To install the necessary packages (those not included in Python's standard library), run the following command:
+The necessary packages (those not included in Python's standard library), can be installed using pip:
 ```bash
 pip install requests beautifulsoup4 numpy pandas scikit-learn
 ```
@@ -39,9 +39,9 @@ To run the script, ensure that the `.txt` file with the list of Wikipedia articl
 
 Example Command:
 ```bash
-python tf_idf_wikiscraper.py --input input.txt --output wordlist.txt --N 50000 --ngram 2
+python tf_idf_wikiscraper.py --input input.txt --output wordlist.txt --N 50000 --ngram_max 2
 ```
 
-Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram` is the maximum of how many words a term in the wordlist can exist of.
+Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram_min` is the minimum and `ngram_max` is the maximum of how many words a term in the wordlist can exist of.
 
 The script will output the terms with the highest average TF-IDF values for all scraped articles. These terms can be considered the most relevant across the provided Wikipedia articles.
