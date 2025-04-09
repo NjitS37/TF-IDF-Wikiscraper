@@ -6,6 +6,7 @@ Created on Fri Feb 14 11:01:47 2025
 """
 
 import argparse
+import math
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
@@ -80,7 +81,7 @@ def custom_tokenizer(text):
     return [word for word in words if word not in ["citation", "citation needed", "isbn", "issn", "displaystyle"]]
 
 
-def wikiscraper(input_file, output_file, N, ngram_min, ngram_max):
+def wikiscraper(input_file, output_file, N, ngram_min, ngram_max, include_weights):
     """Scrapes Wikipedia articles, applies TF-IDF, and outputs the top N words."""
     
     print("Start scraping.")
@@ -127,6 +128,7 @@ def wikiscraper(input_file, output_file, N, ngram_min, ngram_max):
     if all_results:
         final_df = pd.concat(all_results, ignore_index=True)
         final_df.columns = ['word', 'score']
+        final_df['score'] = (final_df['score']*10000).astype(int)
         final_df = final_df.groupby("word").mean().sort_values(by="score", ascending=False)
         top_terms = final_df.head(N).index.tolist()
     else:
@@ -135,7 +137,14 @@ def wikiscraper(input_file, output_file, N, ngram_min, ngram_max):
     # Write wordlist to a file
     with open(output_file, 'w') as f:
         for term in top_terms:
-            f.write(term + '\n')
+            if include_weights:
+                f.write(f"{int(final_df.loc[term, 'score'])} {term}\n")
+
+                
+            else:
+                f.write(term + '\n')
+
+
 
     t1 = time.time()
     print(linklengte, "articles have been scraped.")
@@ -149,10 +158,11 @@ def main():
     parser.add_argument("--N", type=int, default=10000, help="Number of words to output (default: 10000)")
     parser.add_argument("--ngram_min", type=int, default=1, help="Minimum n-gram size (default: 1)")
     parser.add_argument("--ngram_max", type=int, default=1, help="Maximum n-gram size (default: 1)")
+    parser.add_argument("--include_weights", action="store_true", help="Include word 'frequencies' in the output")
 
     args = parser.parse_args()
 
-    wikiscraper(args.input, args.output, args.N, args.ngram_min, args.ngram_max)
+    wikiscraper(args.input, args.output, args.N, args.ngram_min, args.ngram_max, args.include_weights)
 
 
 if __name__ == "__main__":
