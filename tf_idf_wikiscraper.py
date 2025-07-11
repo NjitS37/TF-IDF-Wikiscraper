@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 14 11:01:47 2025
-
-@author: tijna
-"""
 
 import argparse
-import math
 import requests
 from bs4 import BeautifulSoup
-import numpy as np
 import pandas as pd
 from urllib.request import urlopen
 import re

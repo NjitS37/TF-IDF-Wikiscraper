@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jun  2 12:52:53 2025
-
-@author: tijna
-"""
-
 # Dit is de nederlandse versie
 
 import argparse
