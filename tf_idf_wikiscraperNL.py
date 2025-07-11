@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb 14 11:01:47 2025
+Created on Mon Jun  2 12:52:53 2025
 
 @author: tijna
 """
 
+# Dit is de nederlandse versie
+
 import argparse
-import math
 import requests
 from bs4 import BeautifulSoup
-import numpy as np
 import pandas as pd
 from urllib.request import urlopen
 import re
@@ -29,11 +29,13 @@ def contentscraper(link):
     content_area = soup.find(id="mw-content-text")
    
     # Check that only relevant text is saved. Everything (including) after references is ignored
-    references_header = content_area.find("h2", string=re.compile(r"References", re.I))
-    if references_header:
+    references_header1 = content_area.find("h2", string=re.compile(r"Referenties", re.I))
+    references_header2 = content_area.find("h2", string=re.compile(r"Bronnen, noten en/of referenties", re.I))
+    references_header3 = content_area.find("h2", string=re.compile(r"Noten", re.I))
+    if references_header1 or references_header2 or references_header3:
         content = []
         for element in content_area.find_all():
-            if element == references_header:
+            if element == references_header1 or references_header2 or references_header3:
                 break
             
             # Subheaders are ignored
@@ -67,7 +69,7 @@ def linklist(url):
             continue
         
         # Construct full url
-        full_url = "https://en.wikipedia.org" + link['href']
+        full_url = "https://nl.wikipedia.org" + link['href']
         if full_url not in titles_written:
             titles_written.append(full_url)
 
@@ -78,8 +80,10 @@ def custom_tokenizer(text):
     """Tokenizes words and filters out common Wikipedia-specific terms."""
     # Filtering special characters and words that are shorter than 3 characters.
     words = re.findall(r'\b[a-zA-Z\'-]{3,}\b', text.lower())
-    return [word for word in words if word not in ["citation", "citation needed", "isbn", "issn", "displaystyle"]]
+    return [word for word in words if word not in ["citaat", "citaat nodig", "isbn", "issn", "displaystyle", "bron", "bewerken", "brontekst", "artikel"]]
 
+with open('stopwoorden.txt', 'r', encoding='utf-8') as f:
+    regels = [regel.strip() for regel in f]
 
 def wikiscraper(input_file, output_file, N, ngram_min, ngram_max, include_weights):
     """Scrapes Wikipedia articles, applies TF-IDF, and outputs the top N words."""
@@ -91,7 +95,7 @@ def wikiscraper(input_file, output_file, N, ngram_min, ngram_max, include_weight
     with open(input_file, 'r') as f:
         urls = [line.strip() for line in f]
 
-    vectorizer = TfidfVectorizer(ngram_range=(ngram_min, ngram_max), stop_words='english', tokenizer=custom_tokenizer, token_pattern=None)
+    vectorizer = TfidfVectorizer(ngram_range=(ngram_min, ngram_max), stop_words=regels, tokenizer=custom_tokenizer, token_pattern=None)
     all_results = []
     linklengte = 0
     scraped_count = 0
