@@ -41,3 +41,5 @@ python tf_idf_wikiscraper.py --input input.txt --output wordlist.txt --N 50000 -
 Where `input.txt` is the `.txt` file containing the list of URLs and `wordlist.txt` is the output file containing the scraped wordlist. `N` is the length of the returned wordlist, and `ngram_min` is the minimum and `ngram_max` is the maximum of how many words a term in the wordlist can exist of. When not specified, the standard value for `N` is 10000, and the standard values for `ngram_min` and `ngram_max` are 1. An option `include_weights` is also included, where weights are added before the word separated by a space, so that PCFG merging can be applied to this wordlist.
 
 The script will output the terms with the highest average TF-IDF values for all scraped articles. These terms can be considered the most relevant across the provided Wikipedia articles.
+
+The code is available in English and Dutch. For the Dutch version, a text file with common stop words is provided, which is needed to clean the scraped articles (https://github.com/stopwords-iso).
