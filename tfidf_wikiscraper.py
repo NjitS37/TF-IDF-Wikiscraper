@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Aug  8 16:34:07 2025
 
-@author: NjitS37
-"""
+########################################################################################
+#
+# Name: TF-IDF-Wikiscraper
+#
+# tfidf_wikiscraper.py
+#
+#########################################################################################
 
 import argparse
 import requests
@@ -201,3 +204,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
