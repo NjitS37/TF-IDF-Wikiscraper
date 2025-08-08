@@ -22,7 +22,7 @@ Functions of the code:
 - Output: The code outputs the top N terms with the highest average TF-IDF scores.
 
 Running the Code:
-To run the script, ensure that the `.txt file` with the list of Wikipedia article URLs is prepared with the URLs being on separate lines. A single link can also be pasted after `--input`. Then, execute the Python script.
+To run the script, ensure that the `.txt` file with the list of Wikipedia article URLs is prepared with the URLs being on separate lines. A single link can also be pasted after `--input`. Then, execute the Python script.
 
 Example Command:
 ```bash
